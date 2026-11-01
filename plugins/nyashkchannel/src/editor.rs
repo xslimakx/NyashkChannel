@@ -86,7 +86,7 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 knob_r(ui, setter, &p.hp_f, "HP FREQ", rect(lx + 60.0, 196.0, cw, 72.0), "High-pass frequency.", false, r - 3.0);
                 tg(ui, lx + 140.0, 202.0, 44.0, "LP", p.lp_on.value(), &p.lp_on, "Low-pass filter (12 dB/oct).");
                 knob_r(ui, setter, &p.lp_f, "LP FREQ", rect(lx + 190.0, 196.0, cw, 72.0), "Low-pass frequency.", false, r - 3.0);
-                tg(ui, lx + 10.0, 272.0, 100.0, "SPLIT", p.split.value(), &p.split, "Filters act on the dynamics sidechain only, not on the audio.");
+                tg(ui, lx + 10.0, 277.0, 100.0, "SPLIT", p.split.value(), &p.split, "Filters act on the dynamics sidechain only, not on the audio.");
 
                 // expander / gate
                 panel(ui, rect(lx, 306.0, lw, 112.0));
@@ -94,9 +94,9 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 tg(ui, lx + 10.0, 336.0, 44.0, "ON", p.x_on.value(), &p.x_on, "Switch the expander on.");
                 tg(ui, lx + 10.0, 362.0, 44.0, "GATE", p.x_gate.value(), &p.x_gate, "Hard gate instead of a soft expander.");
                 tg(ui, lx + 10.0, 388.0, 44.0, "FAST", p.x_fast.value(), &p.x_fast, "Fast attack.");
-                knob_r(ui, setter, &p.x_thr, "THRESH", rect(lx + 60.0, 332.0, cw, ch), "Level below which the signal is reduced.", false, r);
-                knob_r(ui, setter, &p.x_range, "RANGE", rect(lx + 60.0 + cw, 332.0, cw, ch), "Maximum reduction in dB.", false, r);
-                knob_r(ui, setter, &p.x_rel, "RELEASE", rect(lx + 60.0 + cw * 2.0, 332.0, cw, ch), "Release time.", false, r);
+                knob_ac(ui, setter, &p.x_thr, "THRESH", rect(lx + 60.0, 332.0, cw, ch), "Level below which the signal is reduced.", false, r, C_GATE);
+                knob_ac(ui, setter, &p.x_range, "RANGE", rect(lx + 60.0 + cw, 332.0, cw, ch), "Maximum reduction in dB.", false, r, C_GATE);
+                knob_ac(ui, setter, &p.x_rel, "RELEASE", rect(lx + 60.0 + cw * 2.0, 332.0, cw, ch), "Release time.", false, r, C_GATE);
 
                 // compressor
                 panel(ui, rect(lx, 424.0, lw, 162.0));
@@ -104,9 +104,9 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 tg(ui, lx + 10.0, 454.0, 44.0, "ON", p.c_on.value(), &p.c_on, "Switch the compressor on.");
                 tg(ui, lx + 10.0, 480.0, 44.0, "FAST", p.c_fast.value(), &p.c_fast, "Fast attack.");
                 tg(ui, lx + 10.0, 506.0, 44.0, "AUTO", p.c_auto.value(), &p.c_auto, "Automatic makeup gain.");
-                knob_r(ui, setter, &p.c_thr, "THRESH", rect(lx + 60.0, 450.0, cw, ch), "Level above which compression starts.", false, r);
-                knob_r(ui, setter, &p.c_ratio, "RATIO", rect(lx + 60.0 + cw, 450.0, cw, ch), "Compression ratio.", false, r);
-                knob_r(ui, setter, &p.c_rel, "RELEASE", rect(lx + 60.0 + cw * 2.0, 450.0, cw, ch), "Release time.", false, r);
+                knob_ac(ui, setter, &p.c_thr, "THRESH", rect(lx + 60.0, 450.0, cw, ch), "Level above which compression starts.", false, r, C_DYN);
+                knob_ac(ui, setter, &p.c_ratio, "RATIO", rect(lx + 60.0 + cw, 450.0, cw, ch), "Compression ratio.", false, r, C_DYN);
+                knob_ac(ui, setter, &p.c_rel, "RELEASE", rect(lx + 60.0 + cw * 2.0, 450.0, cw, ch), "Release time.", false, r, C_DYN);
                 let dp = p.dyn_post.value();
                 tg(ui, lx + 10.0, 536.0, lw - 20.0, if dp { "DYNAMICS AFTER EQ" } else { "DYNAMICS BEFORE EQ" }, dp, &p.dyn_post, "Choose whether the dynamics come before or after the EQ.");
 
@@ -149,23 +149,23 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                     let cell = |row: f32| rect(x0 + (bw - cw) * 0.5, 336.0 + row * 82.0, cw, ch);
                     match name {
                         "LF" => {
-                            knob_r(ui, setter, &p.lf_g, "GAIN", cell(0.0), "Low band gain.", true, r);
-                            knob_r(ui, setter, &p.lf_f, "FREQ", cell(1.0), "Low band frequency.", false, r);
+                            knob_ac(ui, setter, &p.lf_g, "GAIN", cell(0.0), "Low band gain.", true, r, C_LF);
+                            knob_ac(ui, setter, &p.lf_f, "FREQ", cell(1.0), "Low band frequency.", false, r, C_LF);
                             tg(ui, x0 + (bw - 60.0) * 0.5, 336.0 + 2.0 * 82.0 + 14.0, 60.0, "BELL", p.lf_bell.value(), &p.lf_bell, "Bell instead of shelf.");
                         }
                         "LMF" => {
-                            knob_r(ui, setter, &p.lmf_g, "GAIN", cell(0.0), "Low-mid gain.", true, r);
-                            knob_r(ui, setter, &p.lmf_f, "FREQ", cell(1.0), "Low-mid frequency.", false, r);
-                            knob_r(ui, setter, &p.lmf_q, "Q", cell(2.0), "Low-mid bandwidth.", false, r);
+                            knob_ac(ui, setter, &p.lmf_g, "GAIN", cell(0.0), "Low-mid gain.", true, r, C_LMF);
+                            knob_ac(ui, setter, &p.lmf_f, "FREQ", cell(1.0), "Low-mid frequency.", false, r, C_LMF);
+                            knob_ac(ui, setter, &p.lmf_q, "Q", cell(2.0), "Low-mid bandwidth.", false, r, C_LMF);
                         }
                         "HMF" => {
-                            knob_r(ui, setter, &p.hmf_g, "GAIN", cell(0.0), "High-mid gain.", true, r);
-                            knob_r(ui, setter, &p.hmf_f, "FREQ", cell(1.0), "High-mid frequency.", false, r);
-                            knob_r(ui, setter, &p.hmf_q, "Q", cell(2.0), "High-mid bandwidth.", false, r);
+                            knob_ac(ui, setter, &p.hmf_g, "GAIN", cell(0.0), "High-mid gain.", true, r, C_HMF);
+                            knob_ac(ui, setter, &p.hmf_f, "FREQ", cell(1.0), "High-mid frequency.", false, r, C_HMF);
+                            knob_ac(ui, setter, &p.hmf_q, "Q", cell(2.0), "High-mid bandwidth.", false, r, C_HMF);
                         }
                         _ => {
-                            knob_r(ui, setter, &p.hf_g, "GAIN", cell(0.0), "High band gain.", true, r);
-                            knob_r(ui, setter, &p.hf_f, "FREQ", cell(1.0), "High band frequency.", false, r);
+                            knob_ac(ui, setter, &p.hf_g, "GAIN", cell(0.0), "High band gain.", true, r, C_HF);
+                            knob_ac(ui, setter, &p.hf_f, "FREQ", cell(1.0), "High band frequency.", false, r, C_HF);
                             tg(ui, x0 + (bw - 60.0) * 0.5, 336.0 + 2.0 * 82.0 + 14.0, 60.0, "BELL", p.hf_bell.value(), &p.hf_bell, "Bell instead of shelf.");
                         }
                     }
