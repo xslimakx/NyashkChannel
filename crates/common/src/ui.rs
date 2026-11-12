@@ -147,7 +147,8 @@ pub fn knob_ac<P: Param>(ui: &mut Ui, setter: &ParamSetter, p: &P, label: &str, 
 
     // value + label (click the value box to type a number)
     let val = p.normalized_value_to_string(norm, true);
-    let vr = Rect::from_center_size(Pos2::new(cell.center().x, c.y + r + 14.0), Vec2::new(cell.width().min(84.0), 18.0));
+    // a small gap to the neighbouring boxes
+    let vr = Rect::from_center_size(Pos2::new(cell.center().x, c.y + r + 14.0), Vec2::new((cell.width() - 6.0).min(84.0), 18.0));
     let edit_id = egui::Id::new(("knob_edit", label, p.name()));
     let editing: Option<String> = ui.data(|d| d.get_temp::<String>(edit_id));
     painter_label(ui, cell, vr, label);
@@ -180,7 +181,10 @@ pub fn knob_ac<P: Param>(ui: &mut Ui, setter: &ParamSetter, p: &P, label: &str, 
         let vresp = ui.allocate_rect(vr, Sense::click()).on_hover_text("Click to type a value");
         let painter = ui.painter();
         painter.rect_stroke(vr, CornerRadius::same(4), Stroke::new(1.0, if vresp.hovered() { DIM } else { LINE }), StrokeKind::Inside);
-        painter.text(vr.center(), Align2::CENTER_CENTER, &val, mono(11.0), WHITE);
+        // shrink the text if it would not fit the box
+        let gw = ui.fonts(|f| f.layout_no_wrap(val.clone(), mono(11.0), WHITE).size().x);
+        let size = if gw > vr.width() - 6.0 { (11.0 * (vr.width() - 6.0) / gw).max(7.5) } else { 11.0 };
+        painter.text(vr.center(), Align2::CENTER_CENTER, &val, mono(size), WHITE);
         if vresp.clicked() {
             let plain = val.trim().split(' ').next().unwrap_or("").to_string();
             ui.data_mut(|d| d.insert_temp(edit_id, plain));

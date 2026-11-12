@@ -71,6 +71,35 @@ impl Default for Params {
     }
 }
 
+/// Magnitude (dB) of the HP (18 dB/oct) and LP (12 dB/oct) filters at `f`, for the display.
+pub fn filter_response_db(fs: f32, hp_on: bool, hp_f: f32, lp_on: bool, lp_f: f32, f: f32) -> f32 {
+    let mut d = 0.0;
+    if hp_on {
+        let hpf = hp_f.max(10.0);
+        d += Coef::highpass1(fs, hpf).response_db(fs, f) + Coef::highpass(fs, hpf, 1.0).response_db(fs, f);
+    }
+    if lp_on {
+        d += Coef::lowpass(fs, lp_f, 0.7071).response_db(fs, f);
+    }
+    d
+}
+
+/// Static curve of the expander / gate and the compressor: output level (dB) for a steady input level.
+#[allow(clippy::too_many_arguments)]
+pub fn dyn_transfer_db(in_db: f32, x_on: bool, x_gate: bool, x_thr: f32, x_range: f32, c_on: bool, c_thr: f32, c_ratio: f32, c_auto: bool) -> f32 {
+    let mut out = in_db;
+    if x_on {
+        out += expander_gain_db(in_db, x_thr, if x_gate { 12.0 } else { 2.0 }, x_range);
+    }
+    if c_on {
+        out += comp_gain_db(in_db, c_thr, c_ratio, 4.0);
+        if c_auto {
+            out += auto_makeup_db(c_thr, c_ratio);
+        }
+    }
+    out
+}
+
 /// Gain computer of the compressor (soft knee). Returns gain in dB (<= 0).
 pub fn comp_gain_db(in_db: f32, thr: f32, ratio: f32, knee: f32) -> f32 {
     let over = in_db - thr;
