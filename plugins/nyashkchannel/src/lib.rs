@@ -14,6 +14,8 @@ mod editor;
 pub struct Meters {
     vals: [AtomicU32; 8],
     pub fs: AtomicU32,
+    /// live output (mono) for the spectrum behind the EQ curve
+    pub tap: nyashk_common::tap::Tap,
 }
 pub const M_IN_L: usize = 0;
 pub const M_IN_R: usize = 1;
@@ -27,6 +29,7 @@ impl Meters {
         Self {
             vals: [AtomicU32::new(m), AtomicU32::new(m), AtomicU32::new(m), AtomicU32::new(m), AtomicU32::new(0), AtomicU32::new(0), AtomicU32::new(0), AtomicU32::new(0)],
             fs: AtomicU32::new(48000f32.to_bits()),
+            tap: nyashk_common::tap::Tap::new(8192),
         }
     }
     pub fn get(&self, i: usize) -> f32 {
@@ -378,6 +381,7 @@ impl Plugin for NyashkChannel {
                 x[i] = *s;
             }
             strip.process(&dp, &mut x, n);
+            self.meters.tap.push(if n == 2 { 0.5 * (x[0] + x[1]) } else { x[0] });
             for i in 0..n {
                 ipk[i] = ipk[i].max(strip.in_peak[i]);
                 opk[i] = opk[i].max(strip.out_peak[i]);

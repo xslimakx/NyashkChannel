@@ -15,6 +15,7 @@ const BASE_W: f32 = 1000.0;
 const BASE_H: f32 = 600.0;
 
 struct Gui {
+    spec: nyashk_common::analyzer::Spectrum,
     lv: [f32; 4],
     hold: [f32; 4],
     gr: [f32; 2],
@@ -25,12 +26,13 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
     let size_state = editor_state.clone();
     create_egui_editor(
         editor_state,
-        Gui { lv: [-90.0; 4], hold: [-90.0; 4], gr: [0.0; 2] },
+        Gui { spec: nyashk_common::analyzer::Spectrum::new(4096), lv: [-90.0; 4], hold: [-90.0; 4], gr: [0.0; 2] },
         |ctx, _| apply_theme(ctx),
         move |ctx, setter, st| {
             ctx.request_repaint_after(Duration::from_millis(33));
             let p = &*params;
             let fs = f32::from_bits(meters.fs.load(std::sync::atomic::Ordering::Relaxed)).max(8000.0);
+            st.spec.update(&meters.tap);
             let cur = [
                 meters.get(M_IN_L).max(meters.get(M_IN_R)),
                 meters.get(M_OUT_L).max(meters.get(M_OUT_R)),
@@ -125,6 +127,17 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 }
                 for f in [50.0f32, 100.0, 500.0, 1000.0, 5000.0, 10000.0] {
                     painter.vline(fxf(f), g.top()..=g.bottom(), Stroke::new(1.0, LINE));
+                    painter.text(Pos2::new(fxf(f), g.bottom() - 8.0), Align2::CENTER_CENTER, if f >= 1000.0 { format!("{}k", f / 1000.0) } else { format!("{}", f) }, mono(9.0), DIM);
+                }
+                // live output spectrum behind the curve (tilted so pink noise looks flat)
+                let spy = |d: f32| g.bottom() - g.height() * ((d + 90.0) / 90.0).clamp(-0.05, 1.05);
+                let sp = st.spec.points(fs, f_lo, f_hi.min(fs * 0.49), 180, 4.5, fxf, spy);
+                nyashk_common::analyzer::draw_spectrum(&painter, g, &sp, Color32::from_gray(26), Color32::from_gray(72));
+                for d in [-12.0f32, -6.0, 6.0, 12.0] {
+                    painter.with_clip_rect(g).hline(g.left()..=g.right(), dyf(d), Stroke::new(1.0, Color32::from_white_alpha(6)));
+                }
+                for f in [50.0f32, 100.0, 500.0, 1000.0, 5000.0, 10000.0] {
+                    painter.with_clip_rect(g).vline(fxf(f), g.top()..=g.bottom(), Stroke::new(1.0, Color32::from_white_alpha(5)));
                     painter.text(Pos2::new(fxf(f), g.bottom() - 8.0), Align2::CENTER_CENTER, if f >= 1000.0 { format!("{}k", f / 1000.0) } else { format!("{}", f) }, mono(9.0), DIM);
                 }
                 let eq_on = p.eq_on.value() && on;
