@@ -74,7 +74,7 @@ fn db(name: &str, min: f32, max: f32, def: f32) -> FloatParam {
     FloatParam::new(name, def, FloatRange::Linear { min, max })
         .with_step_size(0.1)
         .with_smoother(SmoothingStyle::Linear(25.0))
-        .with_value_to_string(Arc::new(|v| format!("{:+.1}", v)))
+        .with_value_to_string(Arc::new(|v| format!("{:+.1}", (v * 10.0).round() / 10.0 + 0.0)))
 }
 fn qp(name: &str) -> FloatParam {
     FloatParam::new(name, 1.0, FloatRange::Skewed { min: 0.3, max: 8.0, factor: FloatRange::skew_factor(-1.5) })
@@ -214,7 +214,7 @@ impl Default for ChannelParams {
             x_fast: BoolParam::new("Expander Fast Attack", false),
             c_on: BoolParam::new("Compressor On", false),
             c_ratio: FloatParam::new("Ratio", 3.0, FloatRange::Skewed { min: 1.0, max: 20.0, factor: FloatRange::skew_factor(-1.5) })
-                .with_value_to_string(Arc::new(|v| if v >= 19.5 { "INF".to_string() } else { format!("{:.1}:1", v) }))
+                .with_value_to_string(Arc::new(|v| if v >= 19.45 { "INF".to_string() } else { format!("{:.1}:1", v) }))
                 .with_string_to_value(Arc::new(|s| {
                     let t = s.trim().to_lowercase();
                     if t == "inf" { Some(20.0) } else { t.trim_end_matches(":1").trim().parse().ok() }
@@ -241,7 +241,7 @@ impl Default for ChannelParams {
             out: FloatParam::new("Output", 0.0, FloatRange::Skewed { min: -60.0, max: 12.0, factor: FloatRange::skew_factor(1.2) })
                 .with_step_size(0.1)
                 .with_smoother(SmoothingStyle::Linear(25.0))
-                .with_value_to_string(Arc::new(|v| if v <= -59.9 { "-inf".to_string() } else { format!("{:+.1}", v) }))
+                .with_value_to_string(Arc::new(|v| if v <= -59.9 { "-inf".to_string() } else { format!("{:+.1}", (v * 10.0).round() / 10.0 + 0.0) }))
                 .with_string_to_value(Arc::new(|s| if s.trim().eq_ignore_ascii_case("-inf") { Some(-60.0) } else { s.trim().parse().ok() })),
             width: FloatParam::new("Width", 100.0, FloatRange::Linear { min: 0.0, max: 200.0 }).with_unit(" %").with_step_size(1.0).with_smoother(SmoothingStyle::Linear(25.0)),
             mono: BoolParam::new("Mono", false),

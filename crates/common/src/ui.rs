@@ -186,7 +186,11 @@ pub fn knob_ac<P: Param>(ui: &mut Ui, setter: &ParamSetter, p: &P, label: &str, 
         let size = if gw > vr.width() - 6.0 { (11.0 * (vr.width() - 6.0) / gw).max(7.5) } else { 11.0 };
         painter.text(vr.center(), Align2::CENTER_CENTER, &val, mono(size), WHITE);
         if vresp.clicked() {
-            let plain = val.trim().split(' ').next().unwrap_or("").to_string();
+            // start editing with the bare number, unless the number alone would mean something
+            // else (e.g. "1.03 s" -> "1.03" would be read as milliseconds): then keep the full text
+            let first = val.trim().split(' ').next().unwrap_or("").to_string();
+            let same = p.string_to_normalized_value(&first).map(|m| p.normalized_value_to_string(m, true)).as_deref() == Some(val.as_str());
+            let plain = if same { first } else { val.trim().to_string() };
             ui.data_mut(|d| d.insert_temp(edit_id, plain));
         }
     }
@@ -319,18 +323,20 @@ pub fn led(ui: &Ui, c: Pos2, on: bool) {
 /// Fill the area between a polyline and the horizontal line `base_y`.
 /// egui fills only convex polygons, so a spectrum has to be drawn as a strip of quads.
 pub fn fill_under(painter: &egui::Painter, pts: &[Pos2], base_y: f32, color: Color32) {
+    // one triangle strip with shared vertices: neighbouring columns never overlap, so a
+    // translucent fill stays even (no brighter seams or specks)
     if pts.len() < 2 {
         return;
     }
     let mut mesh = egui::epaint::Mesh::default();
-    let uv = egui::epaint::WHITE_UV;
-    for w in pts.windows(2) {
-        let (a, b) = (w[0], w[1]);
-        let i = mesh.vertices.len() as u32;
-        for p in [a, b, Pos2::new(b.x, base_y), Pos2::new(a.x, base_y)] {
-            mesh.vertices.push(egui::epaint::Vertex { pos: p, uv, color });
+    for (i, q) in pts.iter().enumerate() {
+        mesh.colored_vertex(*q, color);
+        mesh.colored_vertex(Pos2::new(q.x, base_y), color);
+        if i > 0 {
+            let k = (2 * i) as u32;
+            mesh.add_triangle(k - 2, k - 1, k);
+            mesh.add_triangle(k - 1, k + 1, k);
         }
-        mesh.indices.extend_from_slice(&[i, i + 1, i + 2, i, i + 2, i + 3]);
     }
     painter.add(egui::Shape::mesh(mesh));
 }
