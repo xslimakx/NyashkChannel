@@ -12,7 +12,7 @@ use std::time::Duration;
 use crate::*;
 
 const BASE_W: f32 = 1000.0;
-const BASE_H: f32 = 600.0;
+const BASE_H: f32 = 654.0;
 
 struct Gui {
     spec: nyashk_common::analyzer::Spectrum,
@@ -75,62 +75,62 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 let lx = 14.0;
                 let lw = 300.0;
                 // input
-                panel(ui, rect(lx, 66.0, lw, 100.0));
+                panel(ui, rect(lx, 66.0, lw, 116.0));
                 title("INPUT", lx, 66.0, lw);
-                tg(ui, lx + 10.0, 98.0, 44.0, "Ø", p.phase.value(), &p.phase, "Invert the polarity.");
-                tg(ui, lx + 10.0, 124.0, 44.0, "PAD", p.pad.value(), &p.pad, "-20 dB pad for hot signals.");
-                knob_r(ui, setter, &p.line, "LINE", rect(lx + 64.0, 92.0, cw, 72.0), "Line trim, +/- 20 dB.", true, r - 3.0);
-                knob_r(ui, setter, &p.mic, "MIC", rect(lx + 64.0 + cw, 92.0, cw, 72.0), "Mic preamp gain, 0 to 50 dB.", false, r - 3.0);
-                tg(ui, lx + 64.0 + cw * 2.0 + 6.0, 98.0, 66.0, "ANALOG", p.analog.value(), &p.analog, "Adds gentle transformer-style saturation to the input stage.");
+                tg(ui, lx + 10.0, 104.0, 44.0, "Ø", p.phase.value(), &p.phase, "Invert the polarity.");
+                tg(ui, lx + 10.0, 132.0, 44.0, "PAD", p.pad.value(), &p.pad, "-20 dB pad for hot signals.");
+                knob_r(ui, setter, &p.line, "LINE", rect(lx + 64.0, 98.0, cw, 72.0), "Line trim, +/- 20 dB.", true, r - 3.0);
+                knob_r(ui, setter, &p.mic, "MIC", rect(lx + 64.0 + cw, 98.0, cw, 72.0), "Mic preamp gain, 0 to 50 dB.", false, r - 3.0);
+                tg(ui, lx + 64.0 + cw * 2.0 + 10.0, 118.0, 74.0, "ANALOG", p.analog.value(), &p.analog, "Adds gentle transformer-style saturation to the input stage.");
 
                 // filters
-                panel(ui, rect(lx, 172.0, lw, 130.0));
-                title("FILTERS", lx, 172.0, lw);
-                tg(ui, lx + 10.0, 202.0, 44.0, "HP", p.hp_on.value(), &p.hp_on, "High-pass filter (18 dB/oct).");
-                if knob_r(ui, setter, &p.hp_f, "HP FREQ", rect(lx + 60.0, 196.0, cw, 72.0), "High-pass frequency.", false, r - 3.0).total.is_some() {
+                panel(ui, rect(lx, 188.0, lw, 146.0));
+                title("FILTERS", lx, 188.0, lw);
+                tg(ui, lx + 10.0, 226.0, 44.0, "HP", p.hp_on.value(), &p.hp_on, "High-pass filter (18 dB/oct).");
+                if knob_r(ui, setter, &p.hp_f, "HP FREQ", rect(lx + 60.0, 220.0, cw, 72.0), "High-pass frequency.", false, r - 3.0).total.is_some() {
                     st.dyn_view = false;
                 }
-                tg(ui, lx + 140.0, 202.0, 44.0, "LP", p.lp_on.value(), &p.lp_on, "Low-pass filter (12 dB/oct).");
-                if knob_r(ui, setter, &p.lp_f, "LP FREQ", rect(lx + 190.0, 196.0, cw, 72.0), "Low-pass frequency.", false, r - 3.0).total.is_some() {
+                tg(ui, lx + 150.0, 226.0, 44.0, "LP", p.lp_on.value(), &p.lp_on, "Low-pass filter (12 dB/oct).");
+                if knob_r(ui, setter, &p.lp_f, "LP FREQ", rect(lx + 200.0, 220.0, cw, 72.0), "Low-pass frequency.", false, r - 3.0).total.is_some() {
                     st.dyn_view = false;
                 }
-                tg(ui, lx + 10.0, 277.0, 100.0, "SPLIT", p.split.value(), &p.split, "Filters act on the dynamics sidechain only, not on the audio.");
+                tg(ui, lx + 10.0, 302.0, 100.0, "SPLIT", p.split.value(), &p.split, "Filters act on the dynamics sidechain only, not on the audio.");
 
                 // expander / gate
-                panel(ui, rect(lx, 306.0, lw, 112.0));
-                title("EXPANDER / GATE", lx, 306.0, lw);
-                tg(ui, lx + 10.0, 336.0, 44.0, "ON", p.x_on.value(), &p.x_on, "Switch the expander on.");
-                tg(ui, lx + 10.0, 362.0, 44.0, "GATE", p.x_gate.value(), &p.x_gate, "Hard gate instead of a soft expander.");
-                tg(ui, lx + 10.0, 388.0, 44.0, "FAST", p.x_fast.value(), &p.x_fast, "Fast attack.");
-                if knob_ac(ui, setter, &p.x_thr, "THRESH", rect(lx + 60.0, 332.0, cw, ch), "Level below which the signal is reduced.", false, r, C_GATE).total.is_some() {
+                panel(ui, rect(lx, 340.0, lw, 128.0));
+                title("EXPANDER / GATE", lx, 340.0, lw);
+                tg(ui, lx + 10.0, 372.0, 44.0, "ON", p.x_on.value(), &p.x_on, "Switch the expander on.");
+                tg(ui, lx + 10.0, 398.0, 44.0, "GATE", p.x_gate.value(), &p.x_gate, "Hard gate instead of a soft expander.");
+                tg(ui, lx + 10.0, 424.0, 44.0, "FAST", p.x_fast.value(), &p.x_fast, "Fast attack.");
+                if knob_ac(ui, setter, &p.x_thr, "THRESH", rect(lx + 64.0, 370.0, cw, ch), "Level below which the signal is reduced.", false, r, C_GATE).total.is_some() {
                     st.dyn_view = true;
                 }
-                if knob_ac(ui, setter, &p.x_range, "RANGE", rect(lx + 60.0 + cw, 332.0, cw, ch), "Maximum reduction in dB.", false, r, C_GATE).total.is_some() {
+                if knob_ac(ui, setter, &p.x_range, "RANGE", rect(lx + 64.0 + cw, 370.0, cw, ch), "Maximum reduction in dB.", false, r, C_GATE).total.is_some() {
                     st.dyn_view = true;
                 }
-                knob_ac(ui, setter, &p.x_rel, "RELEASE", rect(lx + 60.0 + cw * 2.0, 332.0, cw, ch), "Release time.", false, r, C_GATE);
+                knob_ac(ui, setter, &p.x_rel, "RELEASE", rect(lx + 64.0 + cw * 2.0, 370.0, cw, ch), "Release time.", false, r, C_GATE);
 
                 // compressor
-                panel(ui, rect(lx, 424.0, lw, 162.0));
-                title("COMPRESSOR", lx, 424.0, lw);
-                tg(ui, lx + 10.0, 454.0, 44.0, "ON", p.c_on.value(), &p.c_on, "Switch the compressor on.");
-                tg(ui, lx + 10.0, 480.0, 44.0, "FAST", p.c_fast.value(), &p.c_fast, "Fast attack.");
-                tg(ui, lx + 10.0, 506.0, 44.0, "AUTO", p.c_auto.value(), &p.c_auto, "Automatic makeup gain.");
-                if knob_ac(ui, setter, &p.c_thr, "THRESH", rect(lx + 60.0, 450.0, cw, ch), "Level above which compression starts.", false, r, C_DYN).total.is_some() {
+                panel(ui, rect(lx, 474.0, lw, 166.0));
+                title("COMPRESSOR", lx, 474.0, lw);
+                tg(ui, lx + 10.0, 506.0, 44.0, "ON", p.c_on.value(), &p.c_on, "Switch the compressor on.");
+                tg(ui, lx + 10.0, 532.0, 44.0, "FAST", p.c_fast.value(), &p.c_fast, "Fast attack.");
+                tg(ui, lx + 10.0, 558.0, 44.0, "AUTO", p.c_auto.value(), &p.c_auto, "Automatic makeup gain.");
+                if knob_ac(ui, setter, &p.c_thr, "THRESH", rect(lx + 64.0, 504.0, cw, ch), "Level above which compression starts.", false, r, C_DYN).total.is_some() {
                     st.dyn_view = true;
                 }
-                if knob_ac(ui, setter, &p.c_ratio, "RATIO", rect(lx + 60.0 + cw, 450.0, cw, ch), "Compression ratio.", false, r, C_DYN).total.is_some() {
+                if knob_ac(ui, setter, &p.c_ratio, "RATIO", rect(lx + 64.0 + cw, 504.0, cw, ch), "Compression ratio.", false, r, C_DYN).total.is_some() {
                     st.dyn_view = true;
                 }
-                knob_ac(ui, setter, &p.c_rel, "RELEASE", rect(lx + 60.0 + cw * 2.0, 450.0, cw, ch), "Release time.", false, r, C_DYN);
+                knob_ac(ui, setter, &p.c_rel, "RELEASE", rect(lx + 64.0 + cw * 2.0, 504.0, cw, ch), "Release time.", false, r, C_DYN);
                 let dp = p.dyn_post.value();
-                tg(ui, lx + 10.0, 536.0, lw - 20.0, if dp { "DYNAMICS AFTER EQ" } else { "DYNAMICS BEFORE EQ" }, dp, &p.dyn_post, "Choose whether the dynamics come before or after the EQ.");
+                tg(ui, lx + 10.0, 606.0, lw - 20.0, if dp { "DYNAMICS AFTER EQ" } else { "DYNAMICS BEFORE EQ" }, dp, &p.dyn_post, "Choose whether the dynamics come before or after the EQ.");
 
                 // ================= centre: EQ
                 let cx = 328.0;
                 let cwid = 440.0;
-                panel(ui, rect(cx, 66.0, cwid, 236.0));
-                let g = rect(cx + 34.0, 82.0, cwid - 50.0, 192.0);
+                panel(ui, rect(cx, 66.0, cwid, 250.0));
+                let g = rect(cx + 34.0, 82.0, cwid - 50.0, 206.0);
                 painter.rect_filled(g, 4.0, Color32::from_rgb(0x07, 0x07, 0x07));
                 let (f_lo, f_hi, d_r) = (20.0f32, 20000.0f32, 18.0f32);
                 let fxf = |f: f32| g.left() + g.width() * (f / f_lo).ln() / (f_hi / f_lo).ln();
@@ -253,18 +253,18 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 tg(ui, cx + cwid - 150.0, 84.0, 60.0, "EQ IN", p.eq_on.value(), &p.eq_on, "Switch the EQ section in or out.");
                 enum_combo(ui, setter, &p.voice, "ch_voice", rect(cx + cwid - 84.0, 84.0, 70.0, 22.0));
 
-                panel(ui, rect(cx, 308.0, cwid, 278.0));
+                panel(ui, rect(cx, 322.0, cwid, 318.0));
                 let bw = cwid / 4.0;
                 let bands: [(&str, f32); 4] = [("LF", 0.0), ("LMF", 1.0), ("HMF", 2.0), ("HF", 3.0)];
                 for (name, i) in bands {
                     let x0 = cx + bw * i;
-                    title(name, x0, 308.0, bw);
-                    let cell = |row: f32| rect(x0 + (bw - cw) * 0.5, 336.0 + row * 82.0, cw, ch);
+                    title(name, x0, 322.0, bw);
+                    let cell = |row: f32| rect(x0 + (bw - cw) * 0.5, 354.0 + row * 94.0, cw, ch);
                     match name {
                         "LF" => {
                             knob_ac(ui, setter, &p.lf_g, "GAIN", cell(0.0), "Low band gain.", true, r, C_LF);
                             knob_ac(ui, setter, &p.lf_f, "FREQ", cell(1.0), "Low band frequency.", false, r, C_LF);
-                            tg(ui, x0 + (bw - 60.0) * 0.5, 336.0 + 2.0 * 82.0 + 14.0, 60.0, "BELL", p.lf_bell.value(), &p.lf_bell, "Bell instead of shelf.");
+                            tg(ui, x0 + (bw - 60.0) * 0.5, 354.0 + 2.0 * 94.0 + 22.0, 60.0, "BELL", p.lf_bell.value(), &p.lf_bell, "Bell instead of shelf.");
                         }
                         "LMF" => {
                             knob_ac(ui, setter, &p.lmf_g, "GAIN", cell(0.0), "Low-mid gain.", true, r, C_LMF);
@@ -279,7 +279,7 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                         _ => {
                             knob_ac(ui, setter, &p.hf_g, "GAIN", cell(0.0), "High band gain.", true, r, C_HF);
                             knob_ac(ui, setter, &p.hf_f, "FREQ", cell(1.0), "High band frequency.", false, r, C_HF);
-                            tg(ui, x0 + (bw - 60.0) * 0.5, 336.0 + 2.0 * 82.0 + 14.0, 60.0, "BELL", p.hf_bell.value(), &p.hf_bell, "Bell instead of shelf.");
+                            tg(ui, x0 + (bw - 60.0) * 0.5, 354.0 + 2.0 * 94.0 + 22.0, 60.0, "BELL", p.hf_bell.value(), &p.hf_bell, "Bell instead of shelf.");
                         }
                     }
                 }
@@ -287,10 +287,10 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 // ================= right: meters + output
                 let rx = 782.0;
                 let rw = BASE_W - rx - 14.0;
-                panel(ui, rect(rx, 66.0, rw, 520.0));
+                panel(ui, rect(rx, 66.0, rw, 574.0));
                 title("METERS", rx, 66.0, rw);
                 let bt = o.y + 104.0;
-                let bh = 220.0;
+                let bh = 250.0;
                 let mut bx = o.x + rx + 22.0;
                 for (i, name) in ["IN", "OUT"].into_iter().enumerate() {
                     let rr = Rect::from_min_size(Pos2::new(bx, bt), Vec2::new(14.0, bh));
@@ -306,10 +306,10 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                     painter.text(Pos2::new(rr.center().x, rr.bottom() + 24.0), Align2::CENTER_CENTER, if st.gr[i] < 0.05 { "0.0".to_string() } else { format!("-{:.1}", st.gr[i]) }, mono(9.0), WHITE);
                     bx += 40.0;
                 }
-                title("OUTPUT", rx, 356.0, rw);
-                knob_r(ui, setter, &p.out, "OUTPUT", rect(rx + 8.0, 384.0, cw, ch), "Output fader in dB.", true, r);
-                knob_r(ui, setter, &p.width, "WIDTH", rect(rx + 8.0 + cw + 6.0, 384.0, cw, ch), "Stereo width: 0 = mono, 100 = unchanged, 200 = double.", false, r);
-                tg(ui, rx + 14.0, 480.0, rw - 28.0, "MONO", p.mono.value(), &p.mono, "Sum the output to mono.");
+                title("OUTPUT", rx, 410.0, rw);
+                knob_r(ui, setter, &p.out, "OUTPUT", rect(rx + 8.0, 444.0, cw, ch), "Output fader in dB.", true, r);
+                knob_r(ui, setter, &p.width, "WIDTH", rect(rx + 8.0 + cw + 6.0, 444.0, cw, ch), "Stereo width: 0 = mono, 100 = unchanged, 200 = double.", false, r);
+                tg(ui, rx + 14.0, 560.0, rw - 28.0, "MONO", p.mono.value(), &p.mono, "Sum the output to mono.");
 
                 resize_grip(ui, ctx, &size_state, full, BASE_W, BASE_H, 760.0);
             });

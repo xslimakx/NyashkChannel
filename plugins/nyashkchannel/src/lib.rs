@@ -194,7 +194,7 @@ pub struct ChannelParams {
 impl Default for ChannelParams {
     fn default() -> Self {
         Self {
-            editor_state: EguiState::from_size(1000, 600),
+            editor_state: EguiState::from_size(1000, 654),
             power: BoolParam::new("Power", true).make_bypass(),
             phase: BoolParam::new("Phase", false),
             pad: BoolParam::new("Pad -20 dB", false),

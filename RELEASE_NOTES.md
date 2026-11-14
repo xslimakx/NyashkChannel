@@ -1,3 +1,8 @@
+## NyashkChannel 1.0.5
+
+- Layout: the labels under the Line / Mic knobs and the EQ Q knobs no longer run into the panel borders; every panel has room at the bottom (window 1000 x 654).
+- A window size saved by an older version is opened with the new proportions.
+
 ## NyashkChannel 1.0.4
 
 - **Alt-tab fix (Linux):** after alt-tab, minimising or covering the window, parts of the picture (backgrounds, knobs, images) could stay blank until something on them moved. The window is now drawn again in full whenever the system throws its contents away, and pictures are no longer lost while the window is hidden or a frame is skipped.
