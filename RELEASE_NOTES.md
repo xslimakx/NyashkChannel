@@ -1,3 +1,7 @@
+## NyashkChannel 1.0.8
+
+- Дзвони на високих частотах тепер мають ту саму форму, що й аналогові, аж до Найквіста: на 44.1/48 кГц високий дзвін більше не «стискається» (cramping). Наприклад, дзвін на 12 кГц +12 дБ дає на 16 кГц +8.5 дБ, і на 96 кГц теж +8.6 дБ (раніше на 44.1 кГц було +4.4 дБ).
+
 ## NyashkChannel 1.0.7
 
 - **Click-free switches:** HP / LP, EQ, ANALOG, the expander / gate and the compressor on-off buttons used to cut over at once (the compressor turned off released up to its full reduction in a single sample, the filters restarted from a stale state). Every switch now fades over 10 ms and the filters keep running underneath; checked for every switch with a sharp-corner detector.
