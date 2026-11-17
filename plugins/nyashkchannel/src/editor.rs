@@ -138,7 +138,7 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 if !st.dyn_view {
                     for d in [-12.0f32, -6.0, 0.0, 6.0, 12.0] {
                         painter.hline(g.left()..=g.right(), dyf(d), Stroke::new(1.0, if d == 0.0 { MID } else { LINE }));
-                        painter.text(Pos2::new(g.left() - 5.0, dyf(d)), Align2::RIGHT_CENTER, format!("{:+.0}", d), mono(9.0), DIM);
+                        painter.text(Pos2::new(g.left() - 5.0, dyf(d)), Align2::RIGHT_CENTER, if d.abs() < 0.5 { "0".to_string() } else { format!("{:+.0}", d) }, mono(9.0), DIM);
                     }
                     for f in [50.0f32, 100.0, 500.0, 1000.0, 5000.0, 10000.0] {
                         painter.vline(fxf(f), g.top()..=g.bottom(), Stroke::new(1.0, LINE));

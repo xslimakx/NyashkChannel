@@ -1,3 +1,7 @@
+## NyashkChannel 1.0.6
+
+- Level scale shows a plain 0 instead of +0.
+
 ## NyashkChannel 1.0.5
 
 - Layout: the labels under the Line / Mic knobs and the EQ Q knobs no longer run into the panel borders; every panel has room at the bottom (window 1000 x 654).
