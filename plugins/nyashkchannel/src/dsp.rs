@@ -148,6 +148,13 @@ pub struct Strip {
     pub out_peak: [f32; 2],
     pub gr_comp: f32,
     pub gr_exp: f32,
+    // 0..1 fades of every switch (5 ms): the filters / EQ / analog stage keep running while off,
+    // so switching them never clicks or starts from a stale state
+    hp_x: f32,
+    lp_x: f32,
+    eq_x: f32,
+    an_x: f32,
+    mk_x: f32,
 }
 
 impl Strip {
@@ -174,6 +181,11 @@ impl Strip {
             out_peak: [0.0; 2],
             gr_comp: 0.0,
             gr_exp: 0.0,
+            hp_x: 0.0,
+            lp_x: 0.0,
+            eq_x: 1.0,
+            an_x: 0.0,
+            mk_x: 0.0,
         }
     }
 
@@ -211,30 +223,34 @@ impl Strip {
 
         // ---- input stage
         let mut ipk = [0.0f32; 2];
+        let step = 1.0 / (0.010 * fs);
+        let fade = |v: &mut f32, on: bool| *v = if on { (*v + step).min(1.0) } else { (*v - step).max(0.0) };
+        fade(&mut self.an_x, p.analog);
+        fade(&mut self.hp_x, p.hp_on && !p.split);
+        fade(&mut self.lp_x, p.lp_on && !p.split);
+        fade(&mut self.eq_x, p.eq_on);
+        fade(&mut self.mk_x, p.c_on && p.c_auto);
+        // (S-shaped fades: no corner where a switch starts or ends)
+        let ss = |u: f32| u * u * (3.0 - 2.0 * u);
+        let ax = ss(self.an_x);
+        let (hx, lx) = (ss(self.hp_x), ss(self.lp_x));
         for i in 0..n {
             ipk[i] = x[i].abs();
-            let mut v = x[i] * in_g;
-            if p.analog {
-                let kk = 1.0 + p.mic_db / 25.0;
-                v = self.os[i].process(v, |a| sat_asym(a * kk, 0.08) / kk);
-            }
-            x[i] = v;
+            let v = x[i] * in_g;
+            let kk = 1.0 + p.mic_db / 25.0;
+            x[i] = self.os[i].process(v, |a| a + (sat_asym(a * kk, 0.08) / kk - a) * ax);
         }
         self.in_peak = ipk;
 
         // ---- filters
         let f = self.filt;
-        if !p.split {
-            for i in 0..n {
-                let mut v = x[i];
-                if p.hp_on {
-                    v = self.hp[i].tick(&[f[0], f[1]], v); // 18 dB/oct: 1st order + biquad
-                }
-                if p.lp_on {
-                    v = self.lp[i].tick(&f[3], v);
-                }
-                x[i] = v;
-            }
+        for i in 0..n {
+            let mut v = x[i];
+            let h = self.hp[i].tick(&[f[0], f[1]], v); // 18 dB/oct: 1st order + biquad
+            v += (h - v) * hx;
+            let l = self.lp[i].tick(&f[3], v);
+            v += (l - v) * lx;
+            x[i] = v;
         }
 
         // ---- EQ / dynamics order
@@ -264,23 +280,17 @@ impl Strip {
     }
 
     fn eq(&mut self, p: &Params, x: &mut [f32; 2], n: usize) {
-        if !p.eq_on {
-            return;
-        }
+        let w = self.eq_x * self.eq_x * (3.0 - 2.0 * self.eq_x);
         for i in 0..n {
-            x[i] = self.eq_st[i].tick(&self.eq_c, x[i]);
+            let y = self.eq_st[i].tick(&self.eq_c, x[i]);
+            x[i] += (y - x[i]) * w;
         }
     }
 
     fn dynamics(&mut self, p: &Params, x: &mut [f32; 2], n: usize) {
-        if !p.x_on && !p.c_on {
-            self.gr_comp = 0.0;
-            self.gr_exp = 0.0;
-            self.x_gain *= 0.999;
-            self.c_gain *= 0.999;
-            return;
-        }
         let fs = self.fs;
+        // switched off: the gain eases back to 0 dB over ~10 ms instead of jumping
+        let off = time_coef(10.0, fs);
         // sidechain level: linked peak, optionally filtered when SPLIT is on
         let mut lvl = 0.0f32;
         for i in 0..n {
@@ -298,41 +308,37 @@ impl Strip {
         let in_db = lin_to_db(lvl.max(1e-6));
         let mut gain_db = 0.0f32;
 
-        if p.x_on {
+        {
             let ratio = if p.x_gate { 12.0 } else { 2.0 };
             let target = expander_gain_db(in_db, p.x_thr, ratio, p.x_range);
             let (att, rel) = (time_coef(if p.x_fast { 0.1 } else { 1.0 }, fs), time_coef(p.x_rel_ms, fs));
             if in_db >= p.x_thr {
                 self.x_hold = (0.012 * fs) as u32;
             }
-            let t = if self.x_hold > 0 {
+            let t = if !p.x_on {
+                0.0
+            } else if self.x_hold > 0 {
                 self.x_hold -= 1;
                 0.0
             } else {
                 target
             };
-            let c = if t > self.x_gain { att } else { rel };
+            let c = if !p.x_on { off } else if t > self.x_gain { att } else { rel };
             self.x_gain = t + (self.x_gain - t) * c;
             gain_db += self.x_gain;
             self.gr_exp = -self.x_gain;
-        } else {
-            self.gr_exp = 0.0;
         }
 
-        if p.c_on {
+        {
             // compressor detects after the expander so the gate can not pump it
             let cdb = in_db + gain_db;
-            let target = comp_gain_db(cdb, p.c_thr, p.c_ratio, 4.0);
+            let target = if p.c_on { comp_gain_db(cdb, p.c_thr, p.c_ratio, 4.0) } else { 0.0 };
             let (att, rel) = (time_coef(if p.c_fast { 0.3 } else { 6.0 }, fs), time_coef(p.c_rel_ms, fs));
-            let c = if target < self.c_gain { att } else { rel };
+            let c = if !p.c_on { off } else if target < self.c_gain { att } else { rel };
             self.c_gain = target + (self.c_gain - target) * c;
             gain_db += self.c_gain;
-            if p.c_auto {
-                gain_db += auto_makeup_db(p.c_thr, p.c_ratio);
-            }
+            gain_db += auto_makeup_db(p.c_thr, p.c_ratio) * self.mk_x;
             self.gr_comp = -self.c_gain;
-        } else {
-            self.gr_comp = 0.0;
         }
         let g = db_to_lin(gain_db);
         for i in 0..n {

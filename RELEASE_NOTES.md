@@ -1,3 +1,8 @@
+## NyashkChannel 1.0.7
+
+- **Click-free switches:** HP / LP, EQ, ANALOG, the expander / gate and the compressor on-off buttons used to cut over at once (the compressor turned off released up to its full reduction in a single sample, the filters restarted from a stale state). Every switch now fades over 10 ms and the filters keep running underneath; checked for every switch with a sharp-corner detector.
+- New behaviour tests: the compressor follows its drawn curve at 2:1 / 4:1 / 10:1, attack ~8 ms (FAST ~0.4 ms), release matches the knob, gate removes its range below the threshold and leaves the signal alone above it, PAD -20 dB, phase, mono, SPLIT keys the dynamics without filtering the audio.
+
 ## NyashkChannel 1.0.6
 
 - Level scale shows a plain 0 instead of +0.
