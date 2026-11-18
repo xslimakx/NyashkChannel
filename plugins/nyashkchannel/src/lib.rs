@@ -10,6 +10,8 @@ use std::sync::Arc;
 
 pub mod dsp;
 mod editor;
+mod hw;
+mod hw_layout;
 
 pub struct Meters {
     vals: [AtomicU32; 8],
