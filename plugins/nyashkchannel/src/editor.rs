@@ -265,6 +265,8 @@ pub fn create(params: Arc<ChannelParams>, meters: Arc<Meters>) -> Option<Box<dyn
                 let lv = |d: f32| ((d + 48.0) / 48.0).clamp(0.0, 1.0);
                 hw::ladder(&painter, hwr, hw::find(lay::LADDERS, "in", |x| x.id), lv(st.lv[0]), false);
                 hw::ladder(&painter, hwr, hw::find(lay::LADDERS, "out", |x| x.id), lv(st.lv[1]), false);
+                hw::ladder_hold(&painter, hwr, hw::find(lay::LADDERS, "in", |x| x.id), lv(st.hold[0]));
+                hw::ladder_hold(&painter, hwr, hw::find(lay::LADDERS, "out", |x| x.id), lv(st.hold[1]));
                 hw::ladder(&painter, hwr, hw::find(lay::LADDERS, "exp", |x| x.id), (st.gr[0] / 20.0).clamp(0.0, 1.0), true);
                 hw::ladder(&painter, hwr, hw::find(lay::LADDERS, "comp", |x| x.id), (st.gr[1] / 20.0).clamp(0.0, 1.0), true);
                 for (i, id) in ["gr_exp", "gr_comp"].into_iter().enumerate() {

@@ -16,7 +16,7 @@ def sec(x0, y0, x1, y1, title, col=None):
     p.text(title, (x0 + x1) / 2, y0 + 12, 7, col or DIM, True, sp=1.5)
 def kn(id, x, y, cap, lbl, D=46, bip=False):
     p.knob(id, x, y, D, 'cap', cap=cap, label=lbl, label_dy=D * 0.5 + 16, bip=bip,
-           scale=dict(r=D * 0.62, n=11, tick=3.5), led=dict(r=D * 0.53, n=15))
+           led=dict(r=D * 0.60, n=15))
 # ---- left column
 sec(30, 60, 330, 170, 'INPUT')
 p.button('phase', 62, 100, 40, 20, 'Ø'); p.button('pad', 62, 130, 40, 20, 'PAD')
@@ -53,7 +53,7 @@ lad = [(0.0, (60, 220, 110)), (0.75, (255, 190, 50)), (0.9, (255, 70, 60))]
 gr = [(0.0, ACC)]
 for id, x, cols in [('in', 812, lad), ('out', 840, lad), ('exp', 884, [(0.0, (60, 220, 110))]), ('comp', 912, gr)]:
     p.ladder(id, x, 86, 16, 250, 26, cols)
-for t, x in [('IN', 820), ('OUT', 848), ('EXP', 892), ('COMP', 920)]: p.text(t, x, 348, 6.5, None, True)
+for t, x in [('IN', 820), ('OUT', 848), ('EXP', 892), ('COMP', 920)]: p.text(t, x, 348, 7.2, None, True)
 p.readout('gr_exp', 892, 364, size=9); p.readout('gr_comp', 920, 364, size=9)
 p.text('OUTPUT', 877, 396, 7, None, True, sp=1.5)
 kn('out', 834, 450, WHT, 'OUTPUT', 50, True); kn('width', 920, 450, BLK, 'WIDTH', 50)
